@@ -33,10 +33,12 @@ export async function POST(request: NextRequest) {
       message: data.message || 'Kata sandi berhasil diperbarui.',
     });
 
+    const isSecure = request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https';
+
     // Update must_change_password cookie flag to 0
     response.cookies.set('must_change_password', '0', {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7,

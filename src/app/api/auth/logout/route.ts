@@ -20,5 +20,7 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.json({ message: 'Logout berhasil' });
   response.cookies.delete('auth_token');
+  response.cookies.delete('user_role');
+  response.cookies.delete('must_change_password');
   return response;
 }

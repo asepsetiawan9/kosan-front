@@ -29,10 +29,13 @@ export async function POST(request: NextRequest) {
       must_change_password: data.must_change_password,
     });
 
+    // Cek protokol request: hanya gunakan flag secure jika request menggunakan HTTPS
+    const isSecure = request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https';
+
     // Simpan token ke httpOnly cookie
     response.cookies.set('auth_token', data.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 hari
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set('user_role', 'penyewa', {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7,
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set('must_change_password', data.must_change_password ? '1' : '0', {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7,

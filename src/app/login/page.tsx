@@ -48,8 +48,7 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login gagal.');
       }
 
-      router.push('/dashboard');
-      router.refresh();
+      window.location.href = '/dashboard';
     } catch (err: unknown) {
       setServerError(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
     }

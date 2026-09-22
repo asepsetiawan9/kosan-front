@@ -34,11 +34,10 @@ function TenantLoginForm() {
       }
 
       if (data.must_change_password) {
-        router.push('/portal/change-password');
+        window.location.href = '/portal/change-password';
       } else {
-        router.push(redirectUrl);
+        window.location.href = redirectUrl;
       }
-      router.refresh();
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
     } finally {

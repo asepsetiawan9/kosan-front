@@ -28,13 +28,32 @@ export async function POST(request: NextRequest) {
       user: data.user,
     });
 
+    // Cek protokol request: hanya gunakan flag secure jika request menggunakan HTTPS
+    const isSecure = request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https';
+
     // Simpan token ke httpOnly cookie yang aman
     response.cookies.set('auth_token', data.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 hari
+    });
+
+    response.cookies.set('user_role', data.user?.role || 'admin', {
+      httpOnly: false,
+      secure: isSecure,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    response.cookies.set('must_change_password', data.user?.must_change_password ? '1' : '0', {
+      httpOnly: false,
+      secure: isSecure,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;
