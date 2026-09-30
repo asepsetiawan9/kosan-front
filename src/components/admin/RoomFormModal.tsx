@@ -10,9 +10,10 @@ import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { FacilityPicker } from '@/components/admin/FacilityPicker';
 import { RoomImageUploader } from '@/components/admin/RoomImageUploader';
-import { Room, Facility } from '@/lib/types';
+import { Room, Facility, Property } from '@/lib/types';
 
 const roomSchema = z.object({
+  property_id: z.string().optional().or(z.literal('')),
   room_number: z.string().min(1, 'Nomor kamar wajib diisi'),
   name: z.string().min(2, 'Nama kamar wajib diisi'),
   type: z.enum(['standar', 'deluxe', 'vip', 'paviliun']),
@@ -30,6 +31,7 @@ interface RoomFormModalProps {
   onClose: () => void;
   editingRoom: Room | null;
   facilities: Facility[];
+  properties?: Property[];
   onSubmit: (values: RoomFormValues) => Promise<void>;
   errorMessage: string | null;
 }
@@ -39,6 +41,7 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
   onClose,
   editingRoom,
   facilities,
+  properties = [],
   onSubmit,
   errorMessage,
 }) => {
@@ -52,6 +55,7 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
   } = useForm<RoomFormValues>({
     resolver: zodResolver(roomSchema),
     defaultValues: {
+      property_id: editingRoom?.property_id || '',
       room_number: editingRoom?.room_number || '',
       name: editingRoom?.name || '',
       type: (editingRoom?.type as any) || 'standar',
@@ -66,6 +70,7 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
   React.useEffect(() => {
     if (editingRoom) {
       reset({
+        property_id: editingRoom.property_id || '',
         room_number: editingRoom.room_number,
         name: editingRoom.name,
         type: editingRoom.type as any,
@@ -77,6 +82,7 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
       });
     } else {
       reset({
+        property_id: '',
         room_number: '',
         name: '',
         type: 'standar',
@@ -112,6 +118,23 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
         {errorMessage && (
           <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
             {errorMessage}
+          </div>
+        )}
+
+        {properties.length > 0 && (
+          <div>
+            <Select
+              label="Properti / Gedung Kosan"
+              error={errors.property_id?.message}
+              {...register('property_id')}
+            >
+              <option value="">Pilih Gedung Properti (Opsional)</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} {p.city ? `— ${p.city}` : ''}
+                </option>
+              ))}
+            </Select>
           </div>
         )}
 

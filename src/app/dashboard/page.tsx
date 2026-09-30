@@ -16,6 +16,7 @@ import {
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { WaHealthWidget } from '@/components/admin/WaHealthWidget';
 import { apiRequest, formatRupiah } from '@/lib/api';
 import { Room, Tenancy, Invoice } from '@/lib/types';
 
@@ -136,6 +137,9 @@ export default function DashboardOverviewPage() {
           </div>
         </Card>
       </div>
+
+      {/* WhatsApp Subsystem Live Health Indicator */}
+      <WaHealthWidget compact />
 
       {/* Two Column Layout: Recent Tenancies & Room Occupancy */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

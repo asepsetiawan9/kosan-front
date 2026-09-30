@@ -11,8 +11,9 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { href: '/', label: 'Beranda' },
+    { href: '/properti', label: 'Properti Kos' },
     { href: '/kamar', label: 'Pilihan Kamar' },
-    { href: '/#fasilitas', label: 'Fasilitas Kos' },
+    { href: '/#fasilitas', label: 'Fasilitas' },
     { href: '/#kontak', label: 'Hubungi Kami' },
   ];
 

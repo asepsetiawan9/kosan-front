@@ -16,8 +16,14 @@ import {
   MessageSquareWarning,
   CreditCard,
   TrendingUp,
+  MessageSquare,
+  BellRing,
+  FileText,
+  History,
+  FileCheck,
 } from 'lucide-react';
-
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/api';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -28,17 +34,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
   const router = useRouter();
 
+  const { data: pendingData } = useQuery<{ success: boolean; count: number }>({
+    queryKey: ['sidebar-wa-pending-count'],
+    queryFn: () => apiRequest<{ success: boolean; count: number }>('/admin/wa/payments/pending-count'),
+    refetchInterval: 15000,
+  });
+
+  const pendingCount = pendingData?.count ?? 0;
+
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/bookings', label: 'Booking Masuk', icon: CalendarCheck },
+    { href: '/dashboard/properties', label: 'Master Properti', icon: Building2 },
     { href: '/dashboard/rooms', label: 'Manajemen Kamar', icon: DoorClosed },
     { href: '/dashboard/tenancies', label: 'Penyewa & Sewa', icon: Users },
     { href: '/dashboard/invoices', label: 'Tagihan & Keuangan', icon: Receipt },
     { href: '/dashboard/payments', label: 'Verifikasi Pembayaran', icon: CreditCard },
+    {
+      href: '/dashboard/wa-payments',
+      label: 'Verifikasi Bukti WA',
+      icon: FileCheck,
+      badge: pendingCount > 0 ? pendingCount : null,
+    },
     { href: '/dashboard/reports', label: 'Laporan Keuangan', icon: TrendingUp },
+    { href: '/dashboard/wa-settings/connection', label: 'WhatsApp Gateway', icon: MessageSquare },
+    { href: '/dashboard/wa-settings/reminders', label: 'Aturan Pengingat WA', icon: BellRing },
+    { href: '/dashboard/wa-settings/templates', label: 'Template Pesan WA', icon: FileText },
+    { href: '/dashboard/wa-messages', label: 'Riwayat Pesan WA', icon: History },
     { href: '/dashboard/complaints', label: 'Aduan Penghuni', icon: MessageSquareWarning },
     { href: '/dashboard/facilities', label: 'Master Fasilitas', icon: Sparkles },
   ];
+
 
 
   const handleLogout = async () => {
@@ -94,8 +120,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-teal-700' : 'text-slate-400'}`} />
-                {item.label}
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-teal-700' : 'text-slate-400'}`} />
+                <span className="flex-1 truncate">{item.label}</span>
+                {item.badge !== undefined && item.badge !== null && item.badge > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white shadow-2xs animate-pulse shrink-0">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}

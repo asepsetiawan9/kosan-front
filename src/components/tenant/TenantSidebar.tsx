@@ -10,7 +10,8 @@ import {
   Home, 
   ShieldCheck,
   Building,
-  FileText
+  FileText,
+  UserCheck
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -23,6 +24,7 @@ export const TenantSidebar: React.FC<TenantSidebarProps> = ({ roomNumber }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/portal/dashboard', icon: LayoutDashboard },
+    { name: 'Profil & Dokumen', href: '/portal/profile', icon: UserCheck },
     { name: 'Tagihan Saya', href: '/portal/invoices', icon: Receipt },
     { name: 'Kontrak Sewa', href: '/portal/contract', icon: FileText },
     { name: 'Aduan Fasilitas', href: '/portal/complaints', icon: MessageSquareWarning },

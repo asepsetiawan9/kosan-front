@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Users, Phone, FileText, LogOut } from 'lucide-react';
+import { Users, Phone, FileText, LogOut, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -13,12 +13,14 @@ interface TenancyTableProps {
   tenancies: Tenancy[];
   isLoading: boolean;
   onCheckout: (tenancy: Tenancy) => void;
+  onViewDocuments?: (tenancy: Tenancy) => void;
 }
 
 export const TenancyTable: React.FC<TenancyTableProps> = ({
   tenancies,
   isLoading,
   onCheckout,
+  onViewDocuments,
 }) => {
   return (
     <Card className="p-0 overflow-hidden">
@@ -108,6 +110,17 @@ export const TenancyTable: React.FC<TenancyTableProps> = ({
 
                   {/* Aksi */}
                   <td className="py-3.5 px-4 md:px-6 text-right whitespace-nowrap">
+                    {onViewDocuments && t.user_id && (
+                      <button
+                        type="button"
+                        onClick={() => onViewDocuments(t)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50/60 hover:bg-indigo-100 text-xs font-semibold transition-colors mr-2 shadow-xs cursor-pointer"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Berkas ID</span>
+                      </button>
+                    )}
+
                     <Link
                       href={`/dashboard/tenancies/${t.id}/contract`}
                       className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-teal-200 text-teal-700 bg-teal-50/60 hover:bg-teal-100 text-xs font-semibold transition-colors mr-2 shadow-xs cursor-pointer"

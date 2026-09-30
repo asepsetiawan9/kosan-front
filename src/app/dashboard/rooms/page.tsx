@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/Button';
 import { RoomTable } from '@/components/admin/RoomTable';
 import { RoomFormModal, RoomFormValues } from '@/components/admin/RoomFormModal';
 import { apiRequest } from '@/lib/api';
-import { Room, Facility } from '@/lib/types';
+import { Room, Facility, Property } from '@/lib/types';
 
 export default function RoomsManagementPage() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProperty, setSelectedProperty] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
 
@@ -21,11 +22,18 @@ export default function RoomsManagementPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Fetch Properties
+  const { data: propertiesData } = useQuery<{ data: Property[] }>({
+    queryKey: ['properties', 'all'],
+    queryFn: () => apiRequest<{ data: Property[] }>('admin/properties?all=1'),
+  });
+
   // Fetch Rooms
   const { data: roomsData, isLoading } = useQuery<{ data: Room[] }>({
-    queryKey: ['rooms', selectedStatus, selectedType, searchTerm],
+    queryKey: ['rooms', selectedProperty, selectedStatus, selectedType, searchTerm],
     queryFn: () => {
       const params = new URLSearchParams();
+      if (selectedProperty) params.append('property_id', selectedProperty);
       if (selectedStatus) params.append('status', selectedStatus);
       if (selectedType) params.append('type', selectedType);
       if (searchTerm) params.append('search', searchTerm);
@@ -39,6 +47,7 @@ export default function RoomsManagementPage() {
     queryFn: () => apiRequest<{ data: Facility[] }>('admin/facilities'),
   });
 
+  const properties = propertiesData?.data || [];
   const rooms = roomsData?.data || [];
   const facilities = facilitiesData?.data || [];
 
@@ -158,12 +167,12 @@ export default function RoomsManagementPage() {
 
       {/* Filter and Search Bar */}
       <Card className="p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Cari nomor atau nama kamar..."
+              placeholder="Cari nomor atau nama..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3.5 py-2 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-none focus:border-teal-600 focus:bg-white transition"
@@ -171,11 +180,24 @@ export default function RoomsManagementPage() {
           </div>
 
           <select
+            value={selectedProperty}
+            onChange={(e) => setSelectedProperty(e.target.value)}
+            className="w-full px-3.5 py-2 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-none focus:border-teal-600 focus:bg-white transition text-slate-700"
+          >
+            <option value="">Semua Gedung Properti</option>
+            {properties.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} {p.city ? `(${p.city})` : ''}
+              </option>
+            ))}
+          </select>
+
+          <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="w-full px-3.5 py-2 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-none focus:border-teal-600 focus:bg-white transition text-slate-700"
           >
-            <option value="">Semua Status Ketersediaan</option>
+            <option value="">Semua Status</option>
             <option value="kosong">Kosong (Tersedia)</option>
             <option value="terisi">Terisi (Disewa)</option>
             <option value="dipesan">Dipesan (Booking)</option>
@@ -210,6 +232,7 @@ export default function RoomsManagementPage() {
         onClose={() => setIsModalOpen(false)}
         editingRoom={editingRoom}
         facilities={facilities}
+        properties={properties}
         onSubmit={handleFormSubmit}
         errorMessage={errorMessage}
       />

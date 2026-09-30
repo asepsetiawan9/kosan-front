@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
+import { WaNumberInput } from '@/components/ui/WaNumberInput';
 import { Room } from '@/lib/types';
 import { formatRupiah } from '@/lib/api';
 
@@ -52,8 +53,11 @@ export const TenancyFormModal: React.FC<TenancyFormModalProps> = ({
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<TenancyFormValues>({
+
     resolver: zodResolver(tenancySchema),
     defaultValues: {
       billing_due_day: 1,
@@ -118,11 +122,13 @@ export const TenancyFormModal: React.FC<TenancyFormModalProps> = ({
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input
-            label="Nomor WhatsApp / HP *"
-            placeholder="081234567890"
+          <WaNumberInput
+            label="Nomor WhatsApp / HP"
+            placeholder="Contoh: 081234567890"
+            value={watch('tenant_phone')}
+            onChange={(norm) => setValue('tenant_phone', norm, { shouldValidate: true })}
             error={errors.tenant_phone?.message}
-            {...register('tenant_phone')}
+            required
           />
 
           <Input
@@ -133,6 +139,7 @@ export const TenancyFormModal: React.FC<TenancyFormModalProps> = ({
             {...register('tenant_email')}
           />
         </div>
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input

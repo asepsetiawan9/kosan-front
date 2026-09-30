@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { TenancyTable } from '@/components/admin/TenancyTable';
 import { TenancyFormModal, TenancyFormValues } from '@/components/admin/TenancyFormModal';
 import { CheckoutModal, CheckoutFormValues } from '@/components/admin/CheckoutModal';
+import { TenantDocumentsDrawer } from '@/components/admin/TenantDocumentsDrawer';
 import { apiRequest } from '@/lib/api';
 import { Tenancy, Room } from '@/lib/types';
 
@@ -19,6 +20,10 @@ export default function TenanciesManagementPage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedTenancy, setSelectedTenancy] = useState<Tenancy | null>(null);
+  const [selectedTenantDocs, setSelectedTenantDocs] = useState<{
+    isOpen: boolean;
+    tenancy: Tenancy | null;
+  }>({ isOpen: false, tenancy: null });
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -173,6 +178,7 @@ export default function TenanciesManagementPage() {
         tenancies={tenancies}
         isLoading={isLoading}
         onCheckout={openCheckoutModal}
+        onViewDocuments={(t) => setSelectedTenantDocs({ isOpen: true, tenancy: t })}
       />
 
       {/* Modal Registrasi Penyewa Component */}
@@ -192,6 +198,18 @@ export default function TenanciesManagementPage() {
         onSubmit={onCheckout}
         errorMessage={errorMessage}
       />
+
+      {/* Drawer Berkas Identitas Penghuni */}
+      {selectedTenantDocs.isOpen && selectedTenantDocs.tenancy && (
+        <TenantDocumentsDrawer
+          isOpen={selectedTenantDocs.isOpen}
+          onClose={() => setSelectedTenantDocs({ isOpen: false, tenancy: null })}
+          userId={selectedTenantDocs.tenancy.user_id || ''}
+          tenantName={selectedTenantDocs.tenancy.tenant_name}
+          tenantPhone={selectedTenantDocs.tenancy.tenant_phone}
+          tenantEmail={selectedTenantDocs.tenancy.tenant_email}
+        />
+      )}
     </div>
   );
 }

@@ -71,6 +71,11 @@ export const RoomTable: React.FC<RoomTableProps> = ({
                       <div>
                         <div className="font-bold text-slate-900 flex items-center gap-2">
                           <span>Unit {room.room_number}</span>
+                          {room.property && (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200/60">
+                              {room.property.name}
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-slate-500 font-medium">{room.name}</div>
                       </div>
