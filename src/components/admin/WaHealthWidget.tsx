@@ -37,8 +37,8 @@ export const WaHealthWidget: React.FC<WaHealthWidgetProps> = ({
     try {
       setIsLoading(true);
       const res = await fetch('/api/proxy/admin/wa/health');
-      if (res.ok) {
-        const json = await res.json();
+      const json = await res.json().catch(() => null);
+      if (json && json.data) {
         setHealth(json.data);
         setLastChecked(new Date());
       }
@@ -64,6 +64,32 @@ export const WaHealthWidget: React.FC<WaHealthWidgetProps> = ({
   const dbOk = health?.checks?.database?.status === 'ok';
   const queueOk = health?.checks?.queue?.status === 'ok';
   const metricsOk = health?.checks?.messages?.status === 'ok';
+
+  if (!health && isLoading) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-soft-card p-6 flex items-center justify-center gap-3 text-slate-500 py-12">
+        <RefreshCw className="w-5 h-5 animate-spin text-emerald-600" />
+        <span className="text-sm font-medium">Memeriksa status diagnostik WhatsApp...</span>
+      </div>
+    );
+  }
+
+  if (!health) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-soft-card p-6 flex flex-col items-center justify-center gap-3 text-slate-500 py-10">
+        <AlertTriangle className="w-8 h-8 text-amber-500" />
+        <p className="text-sm font-semibold text-slate-800">Tidak dapat memuat data diagnostik WhatsApp</p>
+        <p className="text-xs text-slate-500">Periksa koneksi jaringan atau otentikasi sesi Anda.</p>
+        <button
+          onClick={fetchHealth}
+          className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Coba Muat Ulang
+        </button>
+      </div>
+    );
+  }
 
   if (compact) {
     return (
