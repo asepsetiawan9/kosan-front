@@ -31,12 +31,19 @@ export const WaHealthWidget: React.FC<WaHealthWidgetProps> = ({
 }) => {
   const [health, setHealth] = useState<WaHealthCheckResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
 
   const fetchHealth = useCallback(async () => {
     try {
       setIsLoading(true);
       const res = await fetch('/api/proxy/admin/wa/health');
+      if (res.status === 401) {
+        setIsUnauthorized(true);
+        setHealth(null);
+        return;
+      }
+      setIsUnauthorized(false);
       const json = await res.json().catch(() => null);
       if (json && json.data) {
         setHealth(json.data);
@@ -70,6 +77,25 @@ export const WaHealthWidget: React.FC<WaHealthWidgetProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-soft-card p-6 flex items-center justify-center gap-3 text-slate-500 py-12">
         <RefreshCw className="w-5 h-5 animate-spin text-emerald-600" />
         <span className="text-sm font-medium">Memeriksa status diagnostik WhatsApp...</span>
+      </div>
+    );
+  }
+
+  if (isUnauthorized) {
+    return (
+      <div className="bg-white rounded-2xl border border-amber-200/80 shadow-soft-card p-6 flex flex-col items-center justify-center gap-3 text-slate-500 py-10 bg-amber-50/20">
+        <AlertTriangle className="w-8 h-8 text-amber-500" />
+        <p className="text-sm font-bold text-slate-800">Sesi Login Anda Telah Kedaluwarsa</p>
+        <p className="text-xs text-slate-500 text-center max-w-md">
+          Database lokal baru saja di-seed ulang sehingga token sesi lama Anda tidak lagi valid. Silakan login kembali dengan akun administrator.
+        </p>
+        <button
+          onClick={() => { window.location.href = '/login'; }}
+          className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Login Ulang Sekarang
+        </button>
       </div>
     );
   }

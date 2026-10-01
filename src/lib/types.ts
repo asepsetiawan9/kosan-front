@@ -408,6 +408,20 @@ export interface WaTemplate {
   updated_at: string;
 }
 
+export interface WaAntiBanStatus {
+  hourly_count: number;
+  hourly_max: number;
+  daily_count: number;
+  daily_max: number;
+  is_within_business_hours: boolean;
+  business_hours: string;
+  circuit_breaker_open: boolean;
+  consecutive_failures: number;
+  circuit_breaker_threshold: number;
+  delay_range: string;
+  is_sending_allowed: boolean;
+}
+
 export interface WaConnectionStatus {
   status: 'connected' | 'disconnected' | 'error';
   provider: string;
@@ -427,6 +441,7 @@ export interface WaConnectionStatus {
     min: number;
     max: number;
   };
+  antiban?: WaAntiBanStatus;
 }
 
 export interface WaTestSendPayload {

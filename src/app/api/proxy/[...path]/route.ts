@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
@@ -67,7 +67,16 @@ async function handleProxy(request: NextRequest, pathArray: string[], method: st
     });
 
     const data = await res.json().catch(() => ({}));
-    return NextResponse.json(data, { status: res.status });
+    const response = NextResponse.json(data, { status: res.status });
+
+    // Jika token kedaluwarsa atau tidak valid di backend (401), bersihkan cookie stale
+    if (res.status === 401) {
+      response.cookies.delete('auth_token');
+      response.cookies.delete('user_role');
+      response.cookies.delete('must_change_password');
+    }
+
+    return response;
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Gagal menghubungi server API.';
     return NextResponse.json({ message: msg }, { status: 502 });

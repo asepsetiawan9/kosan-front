@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ user: null }, { status: 401 });
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
 
   try {
     const res = await fetch(`${apiUrl}/api/me`, {

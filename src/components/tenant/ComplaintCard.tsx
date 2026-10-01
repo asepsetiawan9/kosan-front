@@ -43,7 +43,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({ complaint }) => {
   const getFullPhotoUrl = (url?: string | null) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
     return `${apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 

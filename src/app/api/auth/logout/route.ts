@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
 
   if (token) {
     try {

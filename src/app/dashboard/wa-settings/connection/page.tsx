@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { WaConnectionStatus } from '@/components/admin/WaConnectionStatus';
 import { WaHealthWidget } from '@/components/admin/WaHealthWidget';
+import { WaAntiBanWidget } from '@/components/admin/WaAntiBanWidget';
 import { WaTestSendModal } from '@/components/admin/WaTestSendModal';
 import { WaMessageTable } from '@/components/admin/WaMessageTable';
 import { 
@@ -41,6 +42,10 @@ export default function WaConnectionSettingsPage() {
     try {
       setIsLoadingStatus(true);
       const res = await fetch('/api/proxy/admin/wa/connection-status');
+      if (res.status === 401) {
+        window.location.href = '/login?expired=1';
+        return;
+      }
       if (res.ok) {
         const json = await res.json();
         setStatus(json.data);
@@ -157,6 +162,16 @@ export default function WaConnectionSettingsPage() {
           fetchMessages();
         }}
         onOpenTestModal={() => setIsTestModalOpen(true)}
+      />
+
+      {/* WhatsApp Anti-Ban Protection & Rate Limiter Widget */}
+      <WaAntiBanWidget
+        antiban={status?.antiban}
+        isLoading={isLoadingStatus}
+        onRefresh={() => {
+          fetchStatus();
+          fetchMessages();
+        }}
       />
 
       {/* Section Header for Logs */}
