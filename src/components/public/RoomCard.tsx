@@ -26,11 +26,6 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onBook }) => {
           alt={room.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-3 left-3">
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500 text-white shadow-xs">
-            Tersedia
-          </span>
-        </div>
         <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-900 bg-white/90 backdrop-blur-xs shadow-xs capitalize">
           Tipe {room.type}
         </div>

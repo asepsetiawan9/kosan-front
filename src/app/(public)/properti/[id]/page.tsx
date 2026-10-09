@@ -15,12 +15,14 @@ import {
   Mail,
   Home,
   Layers,
+  DoorClosed,
 } from 'lucide-react';
 import { Property, Room } from '@/lib/types';
 import { MediaGallery } from '@/components/public/MediaGallery';
 import { GoogleMapsEmbed } from '@/components/public/GoogleMapsEmbed';
 import { PriceRangeDisplay } from '@/components/public/PriceRangeDisplay';
 import { RoomCard } from '@/components/public/RoomCard';
+import { BookingModalForm } from '@/components/public/BookingModalForm';
 
 export default function PublicPropertyDetailPage({
   params,
@@ -31,6 +33,7 @@ export default function PublicPropertyDetailPage({
   const propertyId = resolvedParams.id;
 
   const [property, setProperty] = useState<Property | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +93,7 @@ export default function PublicPropertyDetailPage({
     );
   }
 
-  const availableRooms = property.rooms?.filter((r) => r.status === 'kosong') || [];
+  const allRooms = property.rooms || [];
 
   return (
     <div className="min-h-screen bg-slate-50/60 pb-20 pt-6 sm:pt-8">
@@ -156,16 +159,16 @@ export default function PublicPropertyDetailPage({
                   {property.total_rooms ?? 0} Unit
                 </span>
               </div>
-              <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100">
-                <span className="block text-xs text-emerald-600 font-medium">Kamar Siap Huni</span>
-                <span className="text-xl font-bold text-emerald-700 mt-0.5 block">
-                  {property.available_rooms ?? 0} Unit
-                </span>
-              </div>
-              <div className="col-span-2 sm:col-span-1 p-3.5 rounded-xl bg-teal-50/60 border border-teal-100">
+              <div className="p-3.5 rounded-xl bg-teal-50/60 border border-teal-100">
                 <span className="block text-xs text-teal-600 font-medium">Pengelola Resmi</span>
                 <span className="text-sm font-bold text-teal-900 mt-1 block truncate">
                   {property.owner_name}
+                </span>
+              </div>
+              <div className="col-span-2 sm:col-span-1 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="block text-xs text-slate-400 font-medium">Lokasi / Kota</span>
+                <span className="text-sm font-bold text-slate-800 mt-1 block truncate">
+                  {property.city || 'Indonesia'}
                 </span>
               </div>
             </div>
@@ -193,28 +196,43 @@ export default function PublicPropertyDetailPage({
               </div>
             )}
 
-            {/* Available Rooms Section */}
+            {/* All Rooms Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Pilihan Kamar Siap Huni
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Tersedia {availableRooms.length} kamar kosong di gedung ini
+                  <div className="flex items-center gap-2">
+                    <DoorClosed className="w-5 h-5 text-teal-600" />
+                    <h3 className="text-lg font-bold text-slate-900">
+                      Daftar Pilihan Kamar
+                    </h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Pilihan seluruh unit kamar di properti ini dengan berbagai fasilitas dan kenyamanan.
                   </p>
                 </div>
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200 self-start sm:self-auto">
+                  {allRooms.length} Unit Kamar
+                </span>
               </div>
 
-              {availableRooms.length === 0 ? (
-                <div className="p-8 text-center rounded-2xl bg-white border border-slate-200 text-slate-500">
-                  <p className="text-sm font-semibold text-slate-700">Saat ini seluruh kamar di gedung ini terisi penuh.</p>
-                  <p className="text-xs text-slate-400 mt-1">Silakan hubungi pengelola untuk daftar tunggu atau cek kosan lainnya.</p>
+              {allRooms.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-white border border-slate-200 text-center space-y-2">
+                  <DoorClosed className="w-10 h-10 text-slate-300 mx-auto" />
+                  <p className="text-sm font-semibold text-slate-700">
+                    Belum ada data unit kamar yang terdaftar di properti ini.
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Silakan hubungi pengelola untuk menanyakan informasi ketersediaan atau jadwal survei.
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {availableRooms.map((room) => (
-                    <RoomCard key={room.id} room={room} />
+                  {allRooms.map((room) => (
+                    <RoomCard
+                      key={room.id}
+                      room={room}
+                      onBook={(selected) => setSelectedRoom(selected)}
+                    />
                   ))}
                 </div>
               )}
@@ -247,9 +265,9 @@ export default function PublicPropertyDetailPage({
 
               <div className="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-600">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Status Hunian:</span>
-                  <span className="font-semibold text-emerald-600">
-                    {availableRooms.length > 0 ? `${availableRooms.length} Kamar Tersedia` : 'Penuh'}
+                  <span className="text-slate-400">Total Unit:</span>
+                  <span className="font-semibold text-slate-800">
+                    {allRooms.length} Kamar
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -262,21 +280,14 @@ export default function PublicPropertyDetailPage({
                 </div>
               </div>
 
-              {availableRooms.length > 0 ? (
-                <Link
-                  href={`/kamar/${availableRooms[0].id}`}
-                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-xs sm:text-sm text-center block shadow-lg hover:shadow-xl transition-all"
-                >
-                  Ajukan Sewa Kamar Sekarang
-                </Link>
-              ) : (
-                <button
-                  disabled
-                  className="w-full py-3 px-4 rounded-xl bg-slate-100 text-slate-400 font-semibold text-xs text-center block cursor-not-allowed"
-                >
-                  Kamar Sedang Penuh
-                </button>
-              )}
+              <a
+                href={`https://wa.me/${property.owner_phone ? property.owner_phone.replace(/^0/, '62').replace(/\D/g, '') : '6281234567890'}?text=${encodeURIComponent(`Halo Pengelola ${property.name}, saya tertarik untuk menanyakan informasi kamar dan survei lokasi.`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-xs sm:text-sm text-center block shadow-lg hover:shadow-xl transition-all"
+              >
+                Tanya Pengelola via WhatsApp
+              </a>
 
               {/* Security & Comfort Assurances */}
               <div className="pt-4 border-t border-slate-100 space-y-2">
@@ -297,6 +308,18 @@ export default function PublicPropertyDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Booking Modal Form */}
+      {selectedRoom && (
+        <BookingModalForm
+          room={selectedRoom}
+          isOpen={!!selectedRoom}
+          onClose={() => setSelectedRoom(null)}
+          onSuccess={() => {
+            setSelectedRoom(null);
+          }}
+        />
+      )}
     </div>
   );
 }

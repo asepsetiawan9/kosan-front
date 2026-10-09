@@ -21,10 +21,11 @@ const roomSchema = z.object({
   description: z.string().optional(),
   status: z.enum(['kosong', 'dipesan', 'terisi', 'maintenance']).optional(),
   facility_ids: z.array(z.string()).optional(),
-  image_url: z.string().optional(),
 });
 
-export type RoomFormValues = z.infer<typeof roomSchema>;
+export type RoomFormValues = z.infer<typeof roomSchema> & {
+  photoFile?: File | null;
+};
 
 interface RoomFormModalProps {
   isOpen: boolean;
@@ -45,6 +46,9 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
   onSubmit,
   errorMessage,
 }) => {
+  const [photoFile, setPhotoFile] = React.useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = React.useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -52,7 +56,7 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<RoomFormValues>({
+  } = useForm<z.infer<typeof roomSchema>>({
     resolver: zodResolver(roomSchema),
     defaultValues: {
       property_id: editingRoom?.property_id || '',
@@ -63,12 +67,13 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
       description: editingRoom?.description || '',
       status: (editingRoom?.status as any) || 'kosong',
       facility_ids: editingRoom?.facilities?.map((f) => f.id) || [],
-      image_url: editingRoom?.primary_image || '',
     },
   });
 
   React.useEffect(() => {
     if (editingRoom) {
+      setPhotoFile(null);
+      setExistingImageUrl(editingRoom.primary_image || null);
       reset({
         property_id: editingRoom.property_id || '',
         room_number: editingRoom.room_number,
@@ -78,9 +83,10 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
         description: editingRoom.description || '',
         status: editingRoom.status as any,
         facility_ids: editingRoom.facilities?.map((f) => f.id) || [],
-        image_url: editingRoom.primary_image || '',
       });
     } else {
+      setPhotoFile(null);
+      setExistingImageUrl(null);
       reset({
         property_id: '',
         room_number: '',
@@ -90,13 +96,11 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
         description: '',
         status: 'kosong',
         facility_ids: [],
-        image_url: '',
       });
     }
   }, [editingRoom, reset]);
 
   const selectedFacilityIds = watch('facility_ids') || [];
-  const imageUrl = watch('image_url') || '';
 
   const toggleFacility = (facilityId: string) => {
     const current = selectedFacilityIds;
@@ -104,6 +108,13 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
       ? current.filter((id) => id !== facilityId)
       : [...current, facilityId];
     setValue('facility_ids', next, { shouldValidate: true });
+  };
+
+  const handleFormSubmit = async (values: z.infer<typeof roomSchema>) => {
+    await onSubmit({
+      ...values,
+      photoFile,
+    });
   };
 
   return (
@@ -114,7 +125,7 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
       description="Lengkapi detail ruangan, tipe, harga sewa, dan fasilitas yang tersedia"
       maxWidth="xl"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         {errorMessage && (
           <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
             {errorMessage}
@@ -181,9 +192,16 @@ export const RoomFormModal: React.FC<RoomFormModalProps> = ({
         )}
 
         <RoomImageUploader
-          value={imageUrl}
-          onChange={(val) => setValue('image_url', val, { shouldValidate: true })}
-          error={errors.image_url?.message}
+          file={photoFile}
+          onChangeFile={(f) => {
+            setPhotoFile(f);
+            if (f) setExistingImageUrl(null);
+          }}
+          existingImageUrl={existingImageUrl}
+          onRemoveExisting={() => {
+            setExistingImageUrl(null);
+            setPhotoFile(null);
+          }}
         />
 
         <FacilityPicker

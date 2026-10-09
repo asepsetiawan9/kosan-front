@@ -12,13 +12,14 @@ import {
   ArrowUpRight,
   TrendingUp,
   AlertCircle,
-  Smartphone
+  Smartphone,
+  Building2
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { apiRequest, formatRupiah } from '@/lib/api';
-import { Room, Tenancy, Invoice, BillingTarget, BillingTemplate } from '@/lib/types';
+import { Room, Tenancy, Invoice, BillingTarget, BillingTemplate, Property } from '@/lib/types';
 import { BillingAlertBanner } from '@/components/admin/BillingAlertBanner';
 import { CollectibilityDonutChart } from '@/components/admin/CollectibilityDonutChart';
 import { QuickBillingCard } from '@/components/admin/QuickBillingCard';
@@ -37,6 +38,11 @@ export default function DashboardOverviewPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   // Queries
+  const { data: propertiesData, isLoading: loadingProperties } = useQuery<{ data: Property[] }>({
+    queryKey: ['properties'],
+    queryFn: () => apiRequest<{ data: Property[] }>('admin/properties?all=1'),
+  });
+
   const { data: roomsData, isLoading: loadingRooms } = useQuery<{ data: Room[] }>({
     queryKey: ['rooms'],
     queryFn: () => apiRequest<{ data: Room[] }>('admin/rooms'),
@@ -67,6 +73,7 @@ export default function DashboardOverviewPage() {
     queryFn: () => apiRequest<{ data: BillingTemplate[] }>('admin/billing/templates'),
   });
 
+  const properties = propertiesData?.data || [];
   const rooms = roomsData?.data || [];
   const tenancies = tenanciesData?.data || [];
   const invoices = invoicesData?.data || [];
@@ -81,8 +88,6 @@ export default function DashboardOverviewPage() {
   const billingTemplates = billingTemplatesData?.data || [];
 
   const totalRooms = rooms.length;
-  const availableRooms = rooms.filter((r) => r.status === 'kosong').length;
-  const occupiedRooms = rooms.filter((r) => r.status === 'terisi').length;
   const unpaidInvoices = invoices.filter((i) => i.status === 'belum_bayar' || i.status === 'terlambat');
   const unpaidTotal = unpaidInvoices.reduce((sum, i) => sum + Number(i.total_amount), 0);
 
@@ -177,14 +182,14 @@ export default function DashboardOverviewPage() {
 
         <Card className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-100">
-            <CheckCircle2 className="w-6 h-6" />
+            <Building2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kamar Kosong</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Gedung Properti</p>
             <h3 className="text-2xl font-bold text-emerald-700 mt-0.5">
-              {loadingRooms ? '...' : availableRooms}
+              {loadingProperties ? '...' : properties.length}
             </h3>
-            <span className="text-[11px] text-slate-500 font-medium">Siap disewa langsung</span>
+            <span className="text-[11px] text-slate-500 font-medium">Cabang kosan aktif</span>
           </div>
         </Card>
 
@@ -193,12 +198,12 @@ export default function DashboardOverviewPage() {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kamar Terisi</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Penyewa Aktif</p>
             <h3 className="text-2xl font-bold text-sky-800 mt-0.5">
-              {loadingRooms ? '...' : occupiedRooms}
+              {loadingTenancies ? '...' : activeTenancies.length}
             </h3>
             <span className="text-[11px] text-slate-500 font-medium">
-              Okupansi {totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0}%
+              Penghuni sedang menyewa
             </span>
           </div>
         </Card>

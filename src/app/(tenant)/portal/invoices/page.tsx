@@ -115,20 +115,11 @@ export default function TenantInvoicesPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/portal/invoices/${inv.id}`}
-                    className="flex-1 py-2 px-3 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 transition-colors flex items-center justify-center gap-1"
+                    className="w-full py-2 px-3 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 transition-colors flex items-center justify-center gap-1.5"
                   >
-                    <span>Rincian</span>
+                    <span>Lihat Rincian Tagihan</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
-
-                  {inv.status !== 'lunas' && (
-                    <Link
-                      href={`/portal/invoices/${inv.id}/pay`}
-                      className="flex-1 py-2 px-3 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1 shadow-sm"
-                    >
-                      <span>Bayar</span>
-                    </Link>
-                  )}
                 </div>
               </div>
             );

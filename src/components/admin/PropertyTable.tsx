@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Building2, Edit, Trash2, MapPin, ExternalLink, Phone, Mail, Image as ImageIcon } from 'lucide-react';
+import { Building2, Edit, Trash2, MapPin, ExternalLink, Phone, Mail, Image as ImageIcon, Layers } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Property } from '@/lib/types';
 
@@ -101,19 +101,9 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({
 
                     {/* Unit Kamar Stats */}
                     <td className="py-3.5 px-4 text-center">
-                      <div className="inline-flex items-center gap-2">
-                        <div className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs">
-                          <span className="font-bold">{prop.total_rooms ?? 0}</span>
-                          <span className="text-[10px] text-slate-500 ml-1">Total</span>
-                        </div>
-                        <div className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs">
-                          <span className="font-bold">{prop.available_rooms ?? 0}</span>
-                          <span className="text-[10px] text-emerald-600 ml-1">Kosong</span>
-                        </div>
-                        <div className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200 text-xs">
-                          <span className="font-bold">{prop.occupied_rooms ?? 0}</span>
-                          <span className="text-[10px] text-indigo-600 ml-1">Terisi</span>
-                        </div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold">
+                        <Layers className="w-3.5 h-3.5 text-teal-600" />
+                        <span>{prop.total_rooms ?? 0} Unit Kamar</span>
                       </div>
                     </td>
 

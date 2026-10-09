@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { RoomTable } from '@/components/admin/RoomTable';
 import { RoomFormModal, RoomFormValues } from '@/components/admin/RoomFormModal';
+import { DeleteRoomModal } from '@/components/admin/DeleteRoomModal';
 import { apiRequest } from '@/lib/api';
 import { Room, Facility, Property } from '@/lib/types';
 
@@ -14,12 +15,13 @@ export default function RoomsManagementPage() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProperty, setSelectedProperty] = useState<string>('');
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [deletingRoom, setDeletingRoom] = useState<Room | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Fetch Properties
@@ -30,11 +32,10 @@ export default function RoomsManagementPage() {
 
   // Fetch Rooms
   const { data: roomsData, isLoading } = useQuery<{ data: Room[] }>({
-    queryKey: ['rooms', selectedProperty, selectedStatus, selectedType, searchTerm],
+    queryKey: ['rooms', selectedProperty, selectedType, searchTerm],
     queryFn: () => {
       const params = new URLSearchParams();
       if (selectedProperty) params.append('property_id', selectedProperty);
-      if (selectedStatus) params.append('status', selectedStatus);
       if (selectedType) params.append('type', selectedType);
       if (searchTerm) params.append('search', searchTerm);
       return apiRequest<{ data: Room[] }>(`admin/rooms?${params.toString()}`);
@@ -51,13 +52,40 @@ export default function RoomsManagementPage() {
   const rooms = roomsData?.data || [];
   const facilities = facilitiesData?.data || [];
 
+  const buildRoomPayload = (data: RoomFormValues, method?: 'PUT') => {
+    if (data.photoFile) {
+      const formData = new FormData();
+      if (method) {
+        formData.append('_method', method);
+      }
+      if (data.property_id) formData.append('property_id', data.property_id);
+      formData.append('room_number', data.room_number);
+      formData.append('name', data.name);
+      formData.append('type', data.type);
+      formData.append('base_price', String(data.base_price));
+      if (data.description) formData.append('description', data.description);
+      if (data.status) formData.append('status', data.status);
+      if (data.facility_ids && data.facility_ids.length > 0) {
+        data.facility_ids.forEach((id) => formData.append('facility_ids[]', id));
+      }
+      formData.append('photo', data.photoFile);
+      formData.append('image', data.photoFile);
+      return formData;
+    }
+
+    const { photoFile, ...cleanData } = data;
+    return JSON.stringify(cleanData);
+  };
+
   // Mutations
   const createMutation = useMutation({
-    mutationFn: (data: RoomFormValues) =>
-      apiRequest('admin/rooms', {
+    mutationFn: (data: RoomFormValues) => {
+      const payload = buildRoomPayload(data);
+      return apiRequest('admin/rooms', {
         method: 'POST',
-        body: JSON.stringify(data),
-      }),
+        body: payload,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       setIsModalOpen(false);
@@ -69,11 +97,20 @@ export default function RoomsManagementPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: RoomFormValues) =>
-      apiRequest(`admin/rooms/${editingRoom?.id}`, {
+    mutationFn: (data: RoomFormValues) => {
+      if (data.photoFile) {
+        const payload = buildRoomPayload(data, 'PUT');
+        return apiRequest(`admin/rooms/${editingRoom?.id}`, {
+          method: 'POST',
+          body: payload,
+        });
+      }
+      const { photoFile, ...cleanData } = data;
+      return apiRequest(`admin/rooms/${editingRoom?.id}`, {
         method: 'PUT',
-        body: JSON.stringify(data),
-      }),
+        body: JSON.stringify(cleanData),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       setIsModalOpen(false);
@@ -92,10 +129,12 @@ export default function RoomsManagementPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
-      setSuccessMessage('Kamar berhasil dihapus.');
+      setSuccessMessage(`Kamar ${deletingRoom?.room_number || ''} berhasil dihapus.`);
+      setDeletingRoom(null);
+      setDeleteError(null);
     },
     onError: (err: any) => {
-      setErrorMessage(err.message || 'Gagal menghapus kamar. Kamar mungkin sedang memiliki penyewa aktif.');
+      setDeleteError(err.message || 'Gagal menghapus kamar. Kamar mungkin sedang memiliki penyewa aktif.');
     },
   });
 
@@ -112,9 +151,13 @@ export default function RoomsManagementPage() {
   };
 
   const handleDelete = (room: Room) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus Kamar ${room.room_number}?`)) {
-      deleteMutation.mutate(room.id);
-    }
+    setDeleteError(null);
+    setDeletingRoom(room);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingRoom) return;
+    deleteMutation.mutate(deletingRoom.id);
   };
 
   const handleFormSubmit = async (values: RoomFormValues) => {
@@ -167,7 +210,7 @@ export default function RoomsManagementPage() {
 
       {/* Filter and Search Bar */}
       <Card className="p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
@@ -190,18 +233,6 @@ export default function RoomsManagementPage() {
                 {p.name} {p.city ? `(${p.city})` : ''}
               </option>
             ))}
-          </select>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-none focus:border-teal-600 focus:bg-white transition text-slate-700"
-          >
-            <option value="">Semua Status</option>
-            <option value="kosong">Kosong (Tersedia)</option>
-            <option value="terisi">Terisi (Disewa)</option>
-            <option value="dipesan">Dipesan (Booking)</option>
-            <option value="maintenance">Perbaikan (Maintenance)</option>
           </select>
 
           <select
@@ -235,6 +266,19 @@ export default function RoomsManagementPage() {
         properties={properties}
         onSubmit={handleFormSubmit}
         errorMessage={errorMessage}
+      />
+
+      {/* Modal Konfirmasi Hapus Kamar Component */}
+      <DeleteRoomModal
+        isOpen={Boolean(deletingRoom)}
+        onClose={() => {
+          setDeletingRoom(null);
+          setDeleteError(null);
+        }}
+        room={deletingRoom}
+        onConfirmDelete={handleConfirmDelete}
+        isDeleting={deleteMutation.isPending}
+        errorMessage={deleteError}
       />
     </div>
   );

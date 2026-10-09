@@ -82,6 +82,19 @@ export default function BillingCenterPage() {
     setIsBulkModalOpen(true);
   };
 
+  const handleMarkPaid = async (target: BillingTarget) => {
+    if (!target.invoice_id) return;
+    try {
+      await apiRequest(`admin/invoices/${target.invoice_id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'lunas' }),
+      });
+      loadData();
+    } catch (err) {
+      console.error('Failed to mark invoice as paid', err);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Top Header */}
@@ -162,6 +175,7 @@ export default function BillingCenterPage() {
         onBulkSend={handleBulkSend}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onMarkPaid={handleMarkPaid}
       />
 
       {/* Preview Modal */}

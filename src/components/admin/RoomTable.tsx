@@ -3,7 +3,6 @@
 import React from 'react';
 import { DoorClosed, Edit, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Room } from '@/lib/types';
 import { formatRupiah } from '@/lib/api';
 
@@ -30,20 +29,19 @@ export const RoomTable: React.FC<RoomTableProps> = ({
               <th className="py-3.5 px-4">Tipe</th>
               <th className="py-3.5 px-4">Harga / Bulan</th>
               <th className="py-3.5 px-4">Fasilitas Utama</th>
-              <th className="py-3.5 px-4">Status</th>
               <th className="py-3.5 px-4 md:px-6 text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-slate-400">
+                <td colSpan={5} className="py-12 text-center text-slate-400">
                   Memuat data kamar...
                 </td>
               </tr>
             ) : rooms.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-slate-400">
+                <td colSpan={5} className="py-12 text-center text-slate-400">
                   <DoorClosed className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                   Tidak ada data kamar yang sesuai kriteria filter.
                 </td>
@@ -119,11 +117,6 @@ export const RoomTable: React.FC<RoomTableProps> = ({
                     </div>
                   </td>
 
-                  {/* Status */}
-                  <td className="py-3.5 px-4">
-                    <StatusBadge status={room.status} />
-                  </td>
-
                   {/* Aksi */}
                   <td className="py-3.5 px-4 md:px-6 text-right">
                     <div className="flex items-center justify-end gap-1.5">
@@ -135,9 +128,15 @@ export const RoomTable: React.FC<RoomTableProps> = ({
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
+                        id={`delete-room-btn-${room.room_number}`}
+                        data-testid={`delete-room-${room.id}`}
                         onClick={() => onDeleteRoom(room)}
-                        className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
-                        title="Hapus Kamar"
+                        className={`p-2 rounded-xl border border-transparent transition cursor-pointer ${
+                          room.status === 'terisi'
+                            ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200'
+                            : 'text-slate-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200'
+                        }`}
+                        title={room.status === 'terisi' ? 'Kamar terisi sewa aktif (Klik untuk melihat info)' : 'Hapus Kamar'}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

@@ -14,6 +14,7 @@ import {
   Square,
   AlertTriangle,
   Building,
+  Check,
 } from 'lucide-react';
 
 interface BillingTargetListProps {
@@ -23,6 +24,7 @@ interface BillingTargetListProps {
   onBulkSend: (selectedTenancyIds: string[]) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onMarkPaid?: (target: BillingTarget) => void;
 }
 
 export const BillingTargetList: React.FC<BillingTargetListProps> = ({
@@ -32,6 +34,7 @@ export const BillingTargetList: React.FC<BillingTargetListProps> = ({
   onBulkSend,
   searchQuery,
   onSearchChange,
+  onMarkPaid,
 }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -258,16 +261,29 @@ export const BillingTargetList: React.FC<BillingTargetListProps> = ({
 
                       {/* Action */}
                       <td className="py-3.5 px-4 text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onOpenPreview(target)}
-                          disabled={!target.tenant_phone}
-                          className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200/90 hover:border-emerald-300 font-semibold inline-flex items-center gap-1.5 shadow-2xs"
-                        >
-                          <Send className="w-3 h-3 text-emerald-600" />
-                          Tagih WA
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {target.invoice_status !== 'lunas' && target.invoice_id && onMarkPaid && (
+                            <button
+                              type="button"
+                              onClick={() => onMarkPaid(target)}
+                              className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                              title="Tandai Tagihan Sudah Lunas"
+                            >
+                              <Check className="w-3.5 h-3.5 text-teal-600" />
+                              <span>Lunas</span>
+                            </button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onOpenPreview(target)}
+                            disabled={!target.tenant_phone}
+                            className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200/90 hover:border-emerald-300 font-semibold inline-flex items-center gap-1.5 shadow-2xs"
+                          >
+                            <Send className="w-3 h-3 text-emerald-600" />
+                            Tagih WA
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );

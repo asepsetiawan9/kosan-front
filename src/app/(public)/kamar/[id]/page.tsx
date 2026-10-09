@@ -70,11 +70,11 @@ export default function RoomDetailPage() {
           Kamar yang Anda cari mungkin sedang tidak tersedia atau dalam status perbaikan.
         </p>
         <Link
-          href="/kamar"
+          href="/properti"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white gradient-emerald-glow cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          Kembali ke Katalog Kamar
+          Lihat Pilihan Properti
         </Link>
       </div>
     );
@@ -92,17 +92,14 @@ export default function RoomDetailPage() {
         {/* Breadcrumb / Back Link */}
         <div className="mb-6 flex items-center justify-between">
           <Link
-            href="/kamar"
+            href={room.property_id ? `/properti/${room.property_id}` : '/properti'}
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-teal-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Kembali ke Daftar Kamar
+            <span>Kembali ke Detail Properti</span>
           </Link>
 
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-              {room.status === 'kosong' ? 'Tersedia' : room.status}
-            </span>
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 capitalize">
               Tipe {room.type}
             </span>
@@ -223,10 +220,6 @@ export default function RoomDetailPage() {
 
               <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 space-y-2 text-xs text-teal-950">
                 <div className="flex justify-between">
-                  <span>Status Kamar:</span>
-                  <span className="font-bold text-emerald-700">Siap Ditempati Segera</span>
-                </div>
-                <div className="flex justify-between">
                   <span>Minimal Sewa:</span>
                   <span className="font-semibold text-slate-700">1 Bulan</span>
                 </div>
@@ -238,12 +231,11 @@ export default function RoomDetailPage() {
 
               <button
                 type="button"
-                disabled={room.status !== 'kosong'}
                 onClick={() => setBookingModalOpen(true)}
-                className="w-full py-3.5 rounded-xl text-sm font-bold text-white gradient-emerald-glow shadow-emerald-glow hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 rounded-xl text-sm font-bold text-white gradient-emerald-glow shadow-emerald-glow hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4" />
-                {room.status === 'kosong' ? 'Pesan Kamar Sekarang' : 'Kamar Sedang Terisi'}
+                Pesan Kamar Sekarang
               </button>
 
               <a

@@ -20,8 +20,6 @@ export function PropertyCard({ property, className = '' }: PropertyCardProps) {
     ? (featured.media_type === 'video' ? featured.thumbnail_url || featured.url : featured.url)
     : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80';
 
-  const isAvailable = (property.available_rooms ?? 0) > 0;
-
   return (
     <div className={`group flex flex-col overflow-hidden rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-teal-200 transition-all duration-300 ${className}`}>
       {/* Media Showcase */}
@@ -37,16 +35,10 @@ export function PropertyCard({ property, className = '' }: PropertyCardProps) {
 
         {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-          {/* Availability Status Badge */}
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-sm flex items-center gap-1.5 ${
-              isAvailable
-                ? 'bg-emerald-500/90 text-white border border-emerald-400/40'
-                : 'bg-slate-800/90 text-slate-300 border border-slate-600/40'
-            }`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
-            {isAvailable ? `${property.available_rooms} Kamar Kosong` : 'Kamar Penuh'}
+          {/* Unit Count Badge */}
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-900/80 text-white backdrop-blur-md border border-white/20 shadow-sm flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-teal-300" />
+            <span>{property.total_rooms ?? 0} Unit Kamar</span>
           </span>
 
           {/* Video Tour Badge */}
@@ -82,13 +74,17 @@ export function PropertyCard({ property, className = '' }: PropertyCardProps) {
           <div className="mt-4 flex items-center gap-3 text-xs text-slate-600 bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100">
             <div className="flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-teal-600" />
-              <span>{property.total_rooms ?? 0} Total Unit</span>
+              <span className="font-semibold text-slate-800">{property.total_rooms ?? 0} Total Unit Kamar</span>
             </div>
-            <div className="w-1 h-1 rounded-full bg-slate-300" />
-            <div className="flex items-center gap-1.5 text-emerald-700 font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{property.available_rooms ?? 0} Siap Huni</span>
-            </div>
+            {property.city && (
+              <>
+                <div className="w-1 h-1 rounded-full bg-slate-300" />
+                <div className="flex items-center gap-1 text-slate-500">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{property.city}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 

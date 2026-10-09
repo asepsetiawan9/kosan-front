@@ -91,7 +91,7 @@ export const TenancyFormModal: React.FC<TenancyFormModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Registrasi Penyewa Baru"
-      description="Pilih kamar kosong dan isi kelengkapan profil penghuni untuk aktivasi sewa"
+      description="Pilih unit kamar dan isi kelengkapan profil penghuni untuk aktivasi sewa"
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -102,11 +102,11 @@ export const TenancyFormModal: React.FC<TenancyFormModalProps> = ({
         )}
 
         <Select
-          label="Pilih Kamar Kosong *"
+          label="Pilih Unit Kamar *"
           error={errors.room_id?.message}
           {...register('room_id')}
         >
-          <option value="">-- Pilih Kamar Tersedia --</option>
+          <option value="">-- Pilih Unit Kamar --</option>
           {availableRooms.map((room) => (
             <option key={room.id} value={room.id}>
               Kamar {room.room_number} ({room.type.toUpperCase()}) — {formatRupiah(room.base_price)}/bln

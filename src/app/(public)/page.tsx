@@ -8,6 +8,7 @@ import { RoomCard } from '@/components/public/RoomCard';
 import { PropertyCard } from '@/components/public/PropertyCard';
 import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { GoogleMapsEmbed } from '@/components/public/GoogleMapsEmbed';
+import { PublicComplaintSection } from '@/components/public/PublicComplaintSection';
 import { Room, Property, PropertyMedia } from '@/lib/types';
 import { 
   Wifi, 
@@ -34,8 +35,8 @@ export default function LandingPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch rooms
-        const roomsRes = await fetch('/api/proxy/public/rooms');
+        // Fetch rooms (all rooms)
+        const roomsRes = await fetch('/api/proxy/public/rooms?all=1');
         if (roomsRes.ok) {
           const json = await roomsRes.json();
           setRooms(json.data || []);
@@ -163,6 +164,8 @@ export default function LandingPage() {
                   poster={featuredVideo.media.thumbnail_url}
                   title={featuredVideo.media.title || `Virtual Tour - ${featuredVideo.property.name}`}
                   className="aspect-[16/9] w-full"
+                  autoPlay={true}
+                  muted={true}
                 />
               </div>
             </div>
@@ -170,56 +173,7 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* FEATURED AVAILABLE ROOMS */}
-      <section className="py-16 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-700 mb-2">
-              <CalendarCheck className="w-4 h-4" />
-              Kamar Siap Huni
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Pilihan Kamar Kosong Saat Ini
-            </h2>
-            <p className="text-sm text-slate-500 mt-1">
-              Kamar yang tertera di bawah ini siap dipesan dan ditempati segera.
-            </p>
-          </div>
-          <Link
-            href="/kamar"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-800 hover:underline"
-          >
-            Lihat Semua Kamar
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-80 rounded-2xl bg-slate-200 animate-pulse" />
-            ))}
-          </div>
-        ) : rooms.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
-            <DoorClosed className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-700">Semua Kamar Saat Ini Penuh</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-              Saat ini semua unit kamar sedang terisi. Silakan hubungi pengelola untuk masuk ke daftar tunggu (waiting list).
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rooms.slice(0, 6).map((room) => (
-              <RoomCard
-                key={room.id}
-                room={room}
-                onBook={(r) => setSelectedRoomForBooking(r)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+      {/* SECTION KAMAR PUBLIK DISEMBUNYIKAN SEMENTARA SESUAI INSTRUKSI */}
 
       {/* VALUE PROPOSITIONS / FASILITAS */}
       <section id="fasilitas" className="py-16 bg-white border-y border-slate-200/80">
@@ -256,6 +210,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* PUBLIC COMPLAINT SECTION (ADUAN PUBLIK / PENGUNJUNG) */}
+      <PublicComplaintSection />
+
       {/* CONTACT & LOCATION BANNER */}
       <section id="kontak" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl gradient-fresh-horizon p-8 sm:p-12 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
@@ -282,10 +239,10 @@ export default function LandingPage() {
               Chat WhatsApp Pengelola
             </a>
             <Link
-              href="/kamar"
+              href="/properti"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors"
             >
-              Daftar Kamar
+              Lihat Pilihan Properti
             </Link>
           </div>
         </div>

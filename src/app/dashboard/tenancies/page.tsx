@@ -39,10 +39,10 @@ export default function TenanciesManagementPage() {
     },
   });
 
-  // Fetch Available Rooms
+  // Fetch All Rooms
   const { data: roomsData } = useQuery<{ data: Room[] }>({
     queryKey: ['available-rooms'],
-    queryFn: () => apiRequest<{ data: Room[] }>('admin/rooms?status=kosong'),
+    queryFn: () => apiRequest<{ data: Room[] }>('admin/rooms?all=1'),
   });
 
   const tenancies = tenanciesData?.data || [];

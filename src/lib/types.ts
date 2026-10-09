@@ -170,6 +170,30 @@ export interface Booking {
 export type ComplaintCategory = 'fasilitas_rusak' | 'kebersihan' | 'keamanan' | 'lainnya';
 export type ComplaintStatus = 'baru' | 'diproses' | 'selesai';
 
+export type PublicComplaintCategory = 'fasilitas_rusak' | 'kebersihan' | 'keamanan' | 'air_listrik' | 'lainnya';
+export type PublicComplaintStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';
+
+export interface PublicComplaint {
+  id: string;
+  reporter_name: string;
+  reporter_phone: string;
+  property_id?: string | null;
+  property?: {
+    id: string;
+    name: string;
+    address?: string;
+  } | null;
+  room_number?: string | null;
+  category: PublicComplaintCategory;
+  description: string;
+  photos?: string[] | null;
+  status: PublicComplaintStatus;
+  admin_response?: string | null;
+  resolved_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Complaint {
   id: string;
   tenancy_id: string;

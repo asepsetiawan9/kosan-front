@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Sparkles, DoorClosed, ArrowRight } from 'lucide-react';
+import { Sparkles, Building2, ArrowRight } from 'lucide-react';
 
 export const HeroBanner: React.FC = () => {
   return (
@@ -22,17 +22,17 @@ export const HeroBanner: React.FC = () => {
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
-              Hunian kos bersih, fasilitas komplit, dan lokasi strategis. Booking kamar favorit Anda secara online dalam 2 menit tanpa perantara.
+              Hunian kos bersih, fasilitas komplit, dan lokasi strategis di berbagai cabang terbaik kami.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3.5 pt-2">
               <Link
-                href="/kamar"
+                href="/properti"
                 className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-semibold text-white gradient-emerald-glow shadow-emerald-glow hover:opacity-95 transition-all"
               >
-                <DoorClosed className="w-4 h-4" />
-                Jelajahi Pilihan Kamar
+                <Building2 className="w-4 h-4" />
+                Jelajahi Pilihan Properti
                 <ArrowRight className="w-4 h-4" />
               </Link>
 

@@ -4,7 +4,7 @@ import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Receipt, Calendar, CheckCircle2, AlertTriangle, Building, CreditCard } from 'lucide-react';
+import { ArrowLeft, Receipt, Calendar, CheckCircle2, AlertTriangle, Building, Phone } from 'lucide-react';
 import { apiRequest, formatRupiah } from '@/lib/api';
 import { Invoice } from '@/lib/types';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -130,13 +130,17 @@ export default function TenantInvoiceDetailPage() {
 
           {!isLunas && (
             <div className="flex items-center gap-2 shrink-0">
-              <Link
-                href={`/portal/invoices/${id}/pay`}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-md shadow-indigo-200 flex items-center gap-2 transition-all cursor-pointer"
+              <a
+                href={`https://wa.me/6281234567890?text=${encodeURIComponent(
+                  `Halo Pengelola Kosan, saya ingin konfirmasi pembayaran sewa untuk tagihan ${invoice.invoice_number} (Periode ${invoice.period}) sebesar ${formatRupiah(remaining)}.`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-100 flex items-center gap-2 transition-all cursor-pointer"
               >
-                <CreditCard className="w-4 h-4" />
-                <span>Bayar Sekarang</span>
-              </Link>
+                <Phone className="w-4 h-4" />
+                <span>Konfirmasi Bayar via WhatsApp</span>
+              </a>
             </div>
           )}
         </div>

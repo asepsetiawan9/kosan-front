@@ -98,33 +98,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       ],
     },
     {
-      title: 'Keuangan & Transaksi',
-      items: [
-        {
-          type: 'group',
-          id: 'finance-management',
-          label: 'Keuangan & Billing',
-          icon: Receipt,
-          children: [
-            { href: '/dashboard/invoices', label: 'Tagihan & Invoice', icon: Receipt },
-            { href: '/dashboard/payments', label: 'Verifikasi Pembayaran', icon: CreditCard },
-            { href: '/dashboard/reports', label: 'Laporan Keuangan', icon: TrendingUp },
-          ],
-        },
-      ],
-    },
-    {
-      title: 'Penagihan',
+      title: 'Penagihan & Tagihan',
       items: [
         {
           type: 'group',
           id: 'billing-management',
-          label: 'Pusat Penagihan',
+          label: 'Pusat Penagihan WA',
           icon: Smartphone,
           children: [
             { href: '/dashboard/billing', label: 'Tagih Penghuni', icon: Smartphone },
             { href: '/dashboard/billing/templates', label: 'Template Pesan', icon: FileText },
             { href: '/dashboard/billing/history', label: 'Riwayat Penagihan', icon: History },
+          ],
+        },
+        {
+          type: 'group',
+          id: 'invoice-management',
+          label: 'Tagihan & Laporan',
+          icon: Receipt,
+          children: [
+            { href: '/dashboard/invoices', label: 'Daftar Tagihan', icon: Receipt },
+            { href: '/dashboard/reports', label: 'Laporan Keuangan', icon: TrendingUp },
           ],
         },
       ],
@@ -136,8 +130,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const initial: Record<string, boolean> = {
       'property-management': true,
       'tenant-management': true,
-      'finance-management': true,
       'billing-management': true,
+      'invoice-management': true,
     };
     return initial;
   });
