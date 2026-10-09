@@ -15,15 +15,11 @@ import {
   MessageSquareWarning,
   CreditCard,
   TrendingUp,
-  MessageSquare,
-  BellRing,
   FileText,
   History,
-  FileCheck,
   ChevronDown,
+  Smartphone,
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/api';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -61,14 +57,6 @@ type NavSection = {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
   const router = useRouter();
-
-  const { data: pendingData } = useQuery<{ success: boolean; count: number }>({
-    queryKey: ['sidebar-wa-pending-count'],
-    queryFn: () => apiRequest<{ success: boolean; count: number }>('/admin/wa/payments/pending-count'),
-    refetchInterval: 15000,
-  });
-
-  const pendingCount = pendingData?.count ?? 0;
 
   const navigationSections: NavSection[] = [
     {
@@ -120,30 +108,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           children: [
             { href: '/dashboard/invoices', label: 'Tagihan & Invoice', icon: Receipt },
             { href: '/dashboard/payments', label: 'Verifikasi Pembayaran', icon: CreditCard },
-            {
-              href: '/dashboard/wa-payments',
-              label: 'Verifikasi Bukti WA',
-              icon: FileCheck,
-              badge: pendingCount > 0 ? pendingCount : null,
-            },
             { href: '/dashboard/reports', label: 'Laporan Keuangan', icon: TrendingUp },
           ],
         },
       ],
     },
     {
-      title: 'Otomasi & Komunikasi',
+      title: 'Penagihan',
       items: [
         {
           type: 'group',
-          id: 'whatsapp-management',
-          label: 'WhatsApp Gateway',
-          icon: MessageSquare,
+          id: 'billing-management',
+          label: 'Pusat Penagihan',
+          icon: Smartphone,
           children: [
-            { href: '/dashboard/wa-settings/connection', label: 'Status Gateway', icon: MessageSquare },
-            { href: '/dashboard/wa-messages', label: 'Riwayat Pesan', icon: History },
-            { href: '/dashboard/wa-settings/reminders', label: 'Aturan Pengingat', icon: BellRing },
-            { href: '/dashboard/wa-settings/templates', label: 'Template Pesan', icon: FileText },
+            { href: '/dashboard/billing', label: 'Tagih Penghuni', icon: Smartphone },
+            { href: '/dashboard/billing/templates', label: 'Template Pesan', icon: FileText },
+            { href: '/dashboard/billing/history', label: 'Riwayat Penagihan', icon: History },
           ],
         },
       ],
@@ -156,7 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       'property-management': true,
       'tenant-management': true,
       'finance-management': true,
-      'whatsapp-management': true,
+      'billing-management': true,
     };
     return initial;
   });
