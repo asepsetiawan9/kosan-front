@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -11,16 +11,32 @@ import {
   PlusCircle, 
   ArrowUpRight,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Smartphone
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { WaHealthWidget } from '@/components/admin/WaHealthWidget';
 import { apiRequest, formatRupiah } from '@/lib/api';
-import { Room, Tenancy, Invoice } from '@/lib/types';
+import { Room, Tenancy, Invoice, BillingTarget, BillingTemplate } from '@/lib/types';
+import { BillingAlertBanner } from '@/components/admin/BillingAlertBanner';
+import { CollectibilityDonutChart } from '@/components/admin/CollectibilityDonutChart';
+import { QuickBillingCard } from '@/components/admin/QuickBillingCard';
+import { BillingPreviewModal } from '@/components/admin/BillingPreviewModal';
+
+interface BillingSummaryData {
+  jatuh_tempo_hari_ini: number;
+  mendekati: number;
+  tunggakan: number;
+  lunas_bulan_ini: number;
+  total_target: number;
+}
 
 export default function DashboardOverviewPage() {
+  const [selectedQuickTarget, setSelectedQuickTarget] = useState<BillingTarget | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+
+  // Queries
   const { data: roomsData, isLoading: loadingRooms } = useQuery<{ data: Room[] }>({
     queryKey: ['rooms'],
     queryFn: () => apiRequest<{ data: Room[] }>('admin/rooms'),
@@ -36,9 +52,33 @@ export default function DashboardOverviewPage() {
     queryFn: () => apiRequest<{ data: Invoice[] }>('admin/invoices'),
   });
 
+  const { data: billingSummaryData, isLoading: loadingBillingSummary } = useQuery<{ data: BillingSummaryData }>({
+    queryKey: ['billing-summary'],
+    queryFn: () => apiRequest<{ data: BillingSummaryData }>('admin/billing/summary'),
+  });
+
+  const { data: billingTargetsData, isLoading: loadingBillingTargets } = useQuery<{ data: BillingTarget[] }>({
+    queryKey: ['billing-targets-urgent'],
+    queryFn: () => apiRequest<{ data: BillingTarget[] }>('admin/billing/targets'),
+  });
+
+  const { data: billingTemplatesData } = useQuery<{ data: BillingTemplate[] }>({
+    queryKey: ['billing-templates'],
+    queryFn: () => apiRequest<{ data: BillingTemplate[] }>('admin/billing/templates'),
+  });
+
   const rooms = roomsData?.data || [];
   const tenancies = tenanciesData?.data || [];
   const invoices = invoicesData?.data || [];
+  const billingSummary = billingSummaryData?.data || {
+    jatuh_tempo_hari_ini: 0,
+    mendekati: 0,
+    tunggakan: 0,
+    lunas_bulan_ini: 0,
+    total_target: 0,
+  };
+  const billingTargets = billingTargetsData?.data || [];
+  const billingTemplates = billingTemplatesData?.data || [];
 
   const totalRooms = rooms.length;
   const availableRooms = rooms.filter((r) => r.status === 'kosong').length;
@@ -48,8 +88,37 @@ export default function DashboardOverviewPage() {
 
   const activeTenancies = tenancies.filter((t) => t.status === 'aktif');
 
+  // Urutkan target paling mendesak (tunggakan negatif terbesar dulu, lalu jatuh tempo hari ini = 0, lalu mendekati tempo)
+  const urgentBillingTargets = [...billingTargets]
+    .filter((t) => t.invoice_status !== 'lunas')
+    .sort((a, b) => {
+      const aDays = a.days_until_due ?? 999;
+      const bDays = b.days_until_due ?? 999;
+      return aDays - bDays;
+    })
+    .slice(0, 3);
+
+  // Kolektibilitas data
+  const paidInvoices = invoices.filter((i) => i.status === 'lunas');
+  const pendingInvoices = invoices.filter((i) => i.status === 'belum_bayar');
+  const overdueInvoices = invoices.filter((i) => i.status === 'terlambat');
+
+  const collectibilityData = {
+    lunas: paidInvoices.length,
+    belumBayar: pendingInvoices.length,
+    terlambat: overdueInvoices.length,
+    lunasNominal: paidInvoices.reduce((sum, i) => sum + Number(i.total_amount), 0),
+    belumBayarNominal: pendingInvoices.reduce((sum, i) => sum + Number(i.total_amount), 0),
+    terlambatNominal: overdueInvoices.reduce((sum, i) => sum + Number(i.total_amount), 0),
+  };
+
+  const handleOpenQuickBilling = (target: BillingTarget) => {
+    setSelectedQuickTarget(target);
+    setIsPreviewOpen(true);
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Top Banner */}
       <div className="rounded-3xl p-6 md:p-8 gradient-fresh-horizon border border-slate-200/80 shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -60,10 +129,16 @@ export default function DashboardOverviewPage() {
             Selamat Datang di Portal KosanKu
           </h2>
           <p className="text-sm text-slate-600 mt-1 max-w-xl">
-            Pantau ketersediaan kamar secara real-time, pantau pembayaran sewa bulanan, dan kelola pendaftaran penyewa dengan mudah.
+            Pantau ketersediaan kamar secara real-time, tagih sewa via WhatsApp Web resmi, dan kelola operasional dengan mudah.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <Link href="/dashboard/billing">
+            <Button size="sm" className="gradient-emerald-glow shadow-emerald-glow">
+              <Smartphone className="w-4 h-4" />
+              Pusat Penagihan
+            </Button>
+          </Link>
           <Link href="/dashboard/rooms">
             <Button size="sm" variant="outline" className="bg-white">
               <DoorClosed className="w-4 h-4 text-teal-700" />
@@ -71,13 +146,19 @@ export default function DashboardOverviewPage() {
             </Button>
           </Link>
           <Link href="/dashboard/tenancies">
-            <Button size="sm" className="gradient-emerald-glow shadow-emerald-glow">
-              <PlusCircle className="w-4 h-4" />
+            <Button size="sm" variant="outline" className="bg-white">
+              <PlusCircle className="w-4 h-4 text-teal-700" />
               Daftar Penyewa
             </Button>
           </Link>
         </div>
       </div>
+
+      {/* Alert Banner Penagihan (Fase C.3.1) */}
+      <BillingAlertBanner
+        summary={billingSummary}
+        isLoading={loadingBillingSummary}
+      />
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
@@ -138,10 +219,29 @@ export default function DashboardOverviewPage() {
         </Card>
       </div>
 
-      {/* WhatsApp Subsystem Live Health Indicator */}
-      <WaHealthWidget compact />
+      {/* Section Penagihan & Kolektibilitas (Fase C.2 & C.3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <QuickBillingCard
+            urgentTargets={urgentBillingTargets}
+            isLoading={loadingBillingTargets}
+            onSelectTarget={handleOpenQuickBilling}
+            summary={{
+              jatuh_tempo_hari_ini: billingSummary.jatuh_tempo_hari_ini,
+              tunggakan: billingSummary.tunggakan,
+            }}
+          />
+        </div>
 
-      {/* Two Column Layout: Recent Tenancies & Room Occupancy */}
+        <div className="lg:col-span-1">
+          <CollectibilityDonutChart
+            data={collectibilityData}
+            isLoading={loadingInvoices}
+          />
+        </div>
+      </div>
+
+      {/* Section Operasional: Recent Tenancies & Room Catalog */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Active Tenancies List */}
         <Card className="lg:col-span-2">
@@ -188,7 +288,7 @@ export default function DashboardOverviewPage() {
           )}
         </Card>
 
-        {/* Room Types Summary */}
+        {/* Room Types Catalog */}
         <Card className="flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -227,6 +327,19 @@ export default function DashboardOverviewPage() {
           </div>
         </Card>
       </div>
+
+      {/* Modal Preview Penagihan Langsung dari Dashboard */}
+      {selectedQuickTarget && (
+        <BillingPreviewModal
+          isOpen={isPreviewOpen}
+          onClose={() => {
+            setIsPreviewOpen(false);
+            setSelectedQuickTarget(null);
+          }}
+          target={selectedQuickTarget}
+          templates={billingTemplates}
+        />
+      )}
     </div>
   );
 }
